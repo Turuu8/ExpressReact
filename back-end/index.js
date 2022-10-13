@@ -1,5 +1,6 @@
 const express = require("express")
 const cors = require("cors");
+const bp = require('body-parser')
 const { application } = require("express");
 const corsOptions = {
     origin: '',
@@ -8,6 +9,7 @@ const corsOptions = {
 }
 const app = express()
 app.use(cors(corsOptions))
+app.use(bp.json())
 const port = 8000
 
 const users = [
@@ -35,18 +37,26 @@ app.get('/users/:id', (req, res) => {
 })
 app.delete('/users/:id/d', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
-    let deleteusers = users.filter(user => user.id == req.params.id);
-    let changeData = users.splice(deleteusers, 1)
-    res.send(changeData)
+    const { id } = req.params
+    console.log(id, "aaaaa")
+    if (id > users.length) {
+        res.status(400).json({ message: `${req.params.id} id is not exist` })
+    } else {
+        let deleteusers = users.filter(user => user.id == req.params.id);
+        let changeData = users.splice(deleteusers, 1)
+        res.status(200).json({ message: `User with ${req.params.id} id is deleted ` })
+    }
 })
-app.put('/users/p/:id', (req, res) => {
+app.put('/users/:id', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     let id = req.params.id;
     let body = req.body;
     let index = users.filter(user => user.id == req.params.id);
+    console.log(index)
     let updateUser = { id: id, ...body };
     users[index] = updateUser
     res.send(updateUser);
+    res.status(400).send('404 not found')
 })
 app.listen(port, () => {
     console.log(`Listening on port a ${port}`)
